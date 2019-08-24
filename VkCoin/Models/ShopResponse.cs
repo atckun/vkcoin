@@ -1,13 +1,12 @@
 using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace VkCoin.Models
 {
     [Serializable]
-    public class ShopModel
+    public class ShopResponse
     {
-        [JsonProperty("response")]
+        [JsonProperty(propertyName: "response")]
         public int Response { get; set; }
     }
 }

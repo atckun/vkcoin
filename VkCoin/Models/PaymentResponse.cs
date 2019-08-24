@@ -4,15 +4,15 @@ using Newtonsoft.Json;
 namespace VkCoin.Models
 {
     [Serializable]
-    public class PaymentModel
+    public class PaymentResponse
     {
-        [JsonProperty("id")]
+        [JsonProperty(propertyName: "id")]
         public long Id { get; set; }
         
-        [JsonProperty("amount")]
+        [JsonProperty(propertyName: "amount")]
         public int Amount { get; set; }
         
-        [JsonProperty("current")]
+        [JsonProperty(propertyName: "current")]
         public ulong Current { get; set; }
     }
 }

@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 namespace VkCoin.Models
 {
     [Serializable]
-    public class BalanceModel
+    public class BalanceResponse
     {
-        [JsonProperty("response")]
+        [JsonProperty(propertyName: "response")]
         public IDictionary<string, string> Response { get; set; }
     }
 }
