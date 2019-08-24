@@ -43,5 +43,9 @@ namespace VkCoin.Abstractions
         Task<string> SetCallbackAsync(
             string url = default,
             CancellationToken cancellationToken = default);
+
+        Task<string> DeleteCallbackAsync(CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<string>> GetCallbackLogsAsync(CancellationToken cancellationToken = default);
     }
 }

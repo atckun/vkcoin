@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using VkCoin.Abstractions;
 using VkCoin.Enums;
 using VkCoin.Flurl;
@@ -39,10 +41,18 @@ namespace VkCoin
             var response = await baseUrl
                 .AppendPathSegment(segment: method)
                 .PostJsonAsync(data: @params, cancellationToken: cancellationToken)
-                .ReceiveJson<T>()
+                .ReceiveJson<JObject>()
                 .ConfigureAwait(continueOnCapturedContext: false);
 
-            return response;
+
+            if (response.ContainsKey("error"))
+            {
+                var json = response.ToObject<ResponseError<ErrorResponse>>();
+                var msg = json.Response.Message;
+                throw new Exception(msg);
+            }
+
+            return response.ToObject<T>();
         }
 
         public string GetPaymentUrl(float amount, int? payload = null, bool freeAmount = false)
@@ -125,9 +135,9 @@ namespace VkCoin
             };
 
             var response = await SendApiRequestAsync<BalanceResponse>(
-                "score",
-                @params,
-                cancellationToken)
+                    "score",
+                    @params,
+                    cancellationToken)
                 .ConfigureAwait(false);
 
             return response.Response;
@@ -138,7 +148,8 @@ namespace VkCoin
             CancellationToken cancellationToken = default)
         {
             if (@userIds.Length == 0)
-                throw new ArgumentException(message: "Value cannot be an empty collection.", paramName: nameof(@userIds));
+                throw new ArgumentException(message: "Value cannot be an empty collection.",
+                    paramName: nameof(@userIds));
             if (@userIds.Length > 100)
                 throw new ArgumentException(message: "Length cannot be greater than 100", paramName: nameof(@userIds));
             cancellationToken.ThrowIfCancellationRequested();
@@ -155,7 +166,7 @@ namespace VkCoin
                     @params,
                     cancellationToken)
                 .ConfigureAwait(false);
-            
+
             return response.Response;
         }
 
@@ -173,7 +184,7 @@ namespace VkCoin
                 key = _key,
                 name = @name,
             };
-            
+
             var response = await SendApiRequestAsync<ShopResponse>(
                     "set",
                     @params,
@@ -184,8 +195,50 @@ namespace VkCoin
         }
 
         public async Task<string> SetCallbackAsync(
-            string url = default,
+            string @callback,
             CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(callback))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(callback));
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var @params = new
+            {
+                merchantId = _merchantId,
+                key = _key,
+                callback = @callback
+            };
+
+            var response = await SendApiRequestAsync<CallbackResponse>(
+                    "set",
+                    @params,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            return response.Response;
+        }
+
+        public async Task<string> DeleteCallbackAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            var @params = new
+            {
+                merchantId = _merchantId,
+                key = _key,
+                callback = string.Empty
+            };
+
+            var response = await SendApiRequestAsync<CallbackResponse>(
+                    "set",
+                    @params,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            return response.Response;
+        }
+
+        public async Task<IEnumerable<string>> GetCallbackLogsAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -193,10 +246,10 @@ namespace VkCoin
             {
                 merchantId = _merchantId,
                 key = _key,
-                callback = url
+                status = true
             };
-            
-            var response = await SendApiRequestAsync<CallbackResponse>(
+
+            var response = await SendApiRequestAsync<ResponseArray<string>>(
                     "set",
                     @params,
                     cancellationToken)
