@@ -8,11 +8,8 @@ namespace VkCoin.Exceptions
     [Serializable]
     public class VkCoinException : Exception
     {
-        private const string defaultMessage = "VK Coin API вернул ошибку";
-        private const string additional = "VK Coin API вернул ошибку:\n";
-
-        public VkCoinException() : base(defaultMessage) { }
-        public VkCoinException(string message) : base(additional + message) { }
+        public VkCoinException() { }
+        public VkCoinException(string message) : base(message) { }
         public VkCoinException(string message, Exception inner) : base(message, inner) { }
         protected VkCoinException(
           System.Runtime.Serialization.SerializationInfo info,
