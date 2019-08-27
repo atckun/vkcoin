@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using ComposableAsync;
 using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RateLimiter;
 using VkCoin.Abstractions;
 using VkCoin.Enums;
 using VkCoin.Flurl;
 using VkCoin.Models;
+using VkCoin.Exceptions;
 
 namespace VkCoin
 {
@@ -20,6 +23,10 @@ namespace VkCoin
         private readonly long _merchantId;
 
         private static readonly Random Random = new Random();
+
+        const string baseUrl = "https://coin-without-bugs.vkforms.ru/merchant/";
+
+        private static readonly TimeLimiter timeConstraint = TimeLimiter.GetFromMaxCountByInterval(1, TimeSpan.FromSeconds(20));
 
         public VkCoin(string key, long merchantId)
         {
@@ -37,19 +44,21 @@ namespace VkCoin
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            const string baseUrl = "https://coin-without-bugs.vkforms.ru/merchant/";
+
+            if (method == "set")
+                await timeConstraint;
+
             var response = await baseUrl
                 .AppendPathSegment(segment: method)
                 .PostJsonAsync(data: @params, cancellationToken: cancellationToken)
                 .ReceiveJson<JObject>()
                 .ConfigureAwait(continueOnCapturedContext: false);
 
-
             if (response.ContainsKey("error"))
             {
                 var json = response.ToObject<ResponseError<ErrorResponse>>();
                 var msg = json.Response.Message;
-                throw new Exception(msg);
+                throw new VkCoinException(msg);
             }
 
             return response.ToObject<T>();
