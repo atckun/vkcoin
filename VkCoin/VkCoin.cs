@@ -24,10 +24,16 @@ namespace VkCoin
 
         private static readonly Random Random = new Random();
 
+        //merchant url
         const string baseUrl = "https://coin-without-bugs.vkforms.ru/merchant/";
 
         private static readonly TimeLimiter timeConstraint = TimeLimiter.GetFromMaxCountByInterval(1, TimeSpan.FromSeconds(20));
 
+        /// <summary>
+        /// API для работы с VK Coin.
+        /// </summary>
+        /// <param name="key">Ключ к платежному API.</param>
+        /// <param name="merchantId">Ваш id.</param>
         public VkCoin(string key, long merchantId)
         {
             if (string.IsNullOrWhiteSpace(value: key))
@@ -38,6 +44,12 @@ namespace VkCoin
             _merchantId = merchantId;
         }
 
+        /// <summary>
+        /// Отправка запроса к VK Coin API.
+        /// </summary>
+        /// <typeparam name="T">Модель ответа.</typeparam>
+        /// <param name="method">Метод VK Coin API.</param>
+        /// <param name="params">Тело запроса (будет преобразовано в JSON).</param>
         private static async Task<T> SendApiRequestAsync<T>(
             string method,
             object @params,
@@ -46,7 +58,7 @@ namespace VkCoin
             cancellationToken.ThrowIfCancellationRequested();
 
             if (method == "set")
-                await timeConstraint;
+                await timeConstraint; //ограничение по времени на использование метода /set
 
             var response = await baseUrl
                 .AppendPathSegment(segment: method)
@@ -68,8 +80,8 @@ namespace VkCoin
         {
             var paymentUrl =
                 $"https://vk.com/coin#m{_merchantId}_{amount}_{payload ?? Random.Next(minValue: -2000000000, maxValue: 2000000000)}";
-            if (!freeAmount) return paymentUrl;
 
+            if (!freeAmount) return paymentUrl;
             return paymentUrl + "_1";
         }
 
@@ -90,7 +102,7 @@ namespace VkCoin
             {
                 merchantId = _merchantId,
                 key = _key,
-                tx = new[] {@tx},
+                tx = new[] {@tx}, //"tx": [1 или 2]
                 lastTx = @lastTx
             };
 
@@ -235,7 +247,7 @@ namespace VkCoin
             {
                 merchantId = _merchantId,
                 key = _key,
-                callback = string.Empty
+                callback = 0 //в JSON 0 = null
             };
 
             var response = await SendApiRequestAsync<CallbackResponse>(
@@ -255,7 +267,7 @@ namespace VkCoin
             {
                 merchantId = _merchantId,
                 key = _key,
-                status = true
+                status = 1
             };
 
             var response = await SendApiRequestAsync<ResponseArray<string>>(
