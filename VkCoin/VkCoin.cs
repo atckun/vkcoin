@@ -76,6 +76,7 @@ namespace VkCoin
             return response.ToObject<T>();
         }
 
+        /// <inheritdoc/>
         public string GetPaymentUrl(float amount, int? payload = null, bool freeAmount = false)
         {
             var paymentUrl =
@@ -85,6 +86,7 @@ namespace VkCoin
             return paymentUrl + "_1";
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<TransactionsResponse>> GetTransactionsAsync(
             Tx @tx = Tx.Hundred,
             int? @lastTx = null,
@@ -115,6 +117,7 @@ namespace VkCoin
             return response.Response;
         }
 
+        /// <inheritdoc/>
         public async Task<PaymentResponse> SendPaymentAsync(
             int @toId,
             float @amount,
@@ -144,6 +147,7 @@ namespace VkCoin
             return response.Response;
         }
 
+        /// <inheritdoc/>
         public async Task<IDictionary<string, string>> GetBalanceAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -164,6 +168,7 @@ namespace VkCoin
             return response.Response;
         }
 
+        /// <inheritdoc/>
         public async Task<IDictionary<string, string>> GetBalanceAsync(
             long[] @userIds,
             CancellationToken cancellationToken = default)
@@ -191,6 +196,7 @@ namespace VkCoin
             return response.Response;
         }
 
+        /// <inheritdoc/>
         public async Task<int> SetShopNameAsync(
             string @name,
             CancellationToken cancellationToken = default)
@@ -215,6 +221,7 @@ namespace VkCoin
             return response.Response;
         }
 
+        /// <inheritdoc/>
         public async Task<string> SetCallbackAsync(
             string @callback,
             CancellationToken cancellationToken = default)
@@ -239,6 +246,7 @@ namespace VkCoin
             return response.Response;
         }
 
+        /// <inheritdoc/>
         public async Task<string> DeleteCallbackAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -259,6 +267,7 @@ namespace VkCoin
             return response.Response;
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<string>> GetCallbackLogsAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
